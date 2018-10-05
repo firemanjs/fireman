@@ -1,0 +1,25 @@
+{
+  "name": "fireman-cli",
+  "version": "1.0.0",
+  "description": "Fireman-cli ",
+  "main": "fireman-cli.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Salvatore-Giordano/fireman-cli.git"
+  },
+  "keywords": [
+    "fireman",
+    "fireman-cli",
+    "firebase",
+    "firestore"
+  ],
+  "author": "Salvatore Giordano",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Salvatore-Giordano/fireman-cli/issues"
+  },
+  "homepage": "https://github.com/Salvatore-Giordano/fireman-cli#readme"
+}
