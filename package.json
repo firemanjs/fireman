@@ -25,6 +25,7 @@
   "homepage": "https://github.com/Salvatore-Giordano/fireman-cli#readme",
   "dependencies": {
     "inquirer": "^6.2.0",
-    "pegjs": "^0.10.0"
+    "pegjs": "^0.10.0",
+    "firebase-admin": "latest"
   }
 }

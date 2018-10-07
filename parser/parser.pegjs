@@ -1,8 +1,10 @@
 Path
-  = PathComponent+
+  = "/"? path: PathComponent+ "/"? {
+    return path;
+  }
 
 PathComponent
-  = component:(AllWildcard/Literal/PathExpression) "/"? {
+  = component: (AllWildcard/Literal/PathExpression/Property) "/"? {
       return component;
     }
 
@@ -13,6 +15,14 @@ Literal
           value: value,
         };
     }
+
+Property
+  = .value:Literal {
+    return {
+        type: 'property',
+        value: value.value
+    };
+  }
 
 AllWildcard
   = "*" {
@@ -25,7 +35,7 @@ _ "whitespace"
   = [ \t\n\r]*
 
 UnQuotedIdentifier
-  = $[^\/\{\} ,\^_]+
+  = $[^\/\{\} ,\^_.]+
 
 QuotedIdentifier
   = DoubleQuotedIdentifier / SingleQuotedIdentifier
@@ -50,7 +60,7 @@ Identifier
   = QuotedIdentifier / UnQuotedIdentifier
 
 WhereOperator
-  = "==" / "<" / ">" / "<=" / ">=" / "has"
+  = "==" / "<=" / ">=" / "<" / ">" / "has"
 
 WhereClause
   = _ field:Identifier _ operator:WhereOperator _ value:WhereValue _ {
@@ -63,10 +73,10 @@ WhereClause
     }
 
 WhereValue
-  = True / False / Null / String / Number
+  = True / False / Null / Number / String
 
 String
-   = SingleQuotedString / DoubleQuotedString
+   = SingleQuotedString / DoubleQuotedString / Literal
 
 SingleQuotedString
   = SingleQuote content:((Escape s:("'") {return s;})/[^']+) SingleQuote {
