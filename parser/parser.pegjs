@@ -4,7 +4,7 @@ Path
   }
 
 PathComponent
-  = component: (AllWildcard/Literal/PathExpression/Property) "/"? {
+  = component: (AllWildcard/Literal/CollectionExpression/DocumentExpression) "/"? {
       return component;
     }
 
@@ -16,13 +16,18 @@ Literal
         };
     }
 
-Property
-  = .value:Literal {
-    return {
-        type: 'property',
-        value: value.value
-    };
-  }
+DocumentExpression
+  = '{' _ components:(DocumentExpressionComponent+) _ '}' {
+        return {
+            type: 'documentExpression',
+            components: components,
+          };
+      }
+
+DocumentExpressionComponent
+  = component:(Identifier) _ ","? _ {
+      return component;
+    }
 
 AllWildcard
   = "*" {
@@ -35,7 +40,7 @@ _ "whitespace"
   = [ \t\n\r]*
 
 UnQuotedIdentifier
-  = $[^\/\{\} ,\^_.]+
+  = $[^\/\{\}\[\]\<\>\= ,\^_.]+
 
 QuotedIdentifier
   = DoubleQuotedIdentifier / SingleQuotedIdentifier
@@ -122,10 +127,10 @@ OrderClause
         };
     }
 
-PathExpression
-  = '{' _ components:(PathExpressionComponent+) _ '}' {
+CollectionExpression
+  = '[' _ components:(PathExpressionComponent+) _ ']' {
       return {
-          type: 'expression',
+          type: 'collectionExpression',
           components: components,
         };
     }

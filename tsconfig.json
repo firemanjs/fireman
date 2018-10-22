@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "module": "commonjs",
+    "lib": [
+      "es2017"
+    ],
+    "target": "es6",
+    "sourceMap": true,
+    "noEmitOnError": false,
+    "declaration": true
+  }
+}

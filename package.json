@@ -1,8 +1,11 @@
 {
-  "name": "fireman-cli",
+  "name": "fireman",
   "version": "1.0.0",
-  "description": "Fireman-cli ",
-  "main": "fireman-cli.js",
+  "description": "Fireman",
+  "main": "fireman.js",
+  "bin": {
+    "fireman": "fireman-cli.ts"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npx pegjs ./parser/parser.pegjs"
@@ -13,7 +16,6 @@
   },
   "keywords": [
     "fireman",
-    "fireman-cli",
     "firebase",
     "firestore"
   ],
