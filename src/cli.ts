@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import {query} from './query-result';
+import {query} from './query';
 
 import * as readLine from "readline";
 
