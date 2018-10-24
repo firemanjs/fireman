@@ -73,7 +73,7 @@ WhereClause
         type: 'where',
         field: field,
         value: value,
-        operator: operator,
+        operator: operator === 'has' ? 'array_contains' : operator,
       };
     }
 

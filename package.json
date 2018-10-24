@@ -1,14 +1,16 @@
 {
   "name": "fireman",
-  "version": "1.0.0",
-  "description": "Fireman",
-  "main": "fireman.js",
+  "version": "0.0.5",
+  "description": "Fireman API and CLI",
+  "main": "dist/index.js",
   "bin": {
-    "fireman": "fireman-cli.ts"
+    "fireman": "dist/cli.js"
   },
+  "types": "dist/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "npx pegjs ./parser/parser.pegjs"
+    "build": "npx tsc",
+    "build:parser": "npx pegjs ./parser/parser.pegjs"
   },
   "repository": {
     "type": "git",
@@ -27,7 +29,10 @@
   "homepage": "https://github.com/Salvatore-Giordano/fireman-cli#readme",
   "dependencies": {
     "inquirer": "^6.2.0",
+    "firebase-admin": "^6.1.0"
+  },
+  "devDependencies": {
     "pegjs": "^0.10.0",
-    "firebase-admin": "latest"
+    "typescript": "^3.1.3"
   }
 }
