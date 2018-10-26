@@ -4,7 +4,7 @@ import {DocumentSnapshot, QueryDocumentSnapshot, QuerySnapshot} from '@google-cl
 import CollectionReference = FirebaseAdmin.firestore.CollectionReference;
 import DocumentReference = FirebaseAdmin.firestore.DocumentReference;
 
-const serviceAccount = require('../nyous-763e4-firebase-adminsdk-5do8g-ca74abfcd3.json');
+const serviceAccount = require('../dist/projects/nyous-763e4-firebase-adminsdk-5do8g-ca74abfcd3.json');
 FirebaseAdmin.initializeApp({
   credential: FirebaseAdmin.credential.cert(serviceAccount),
   databaseURL: 'https://nyous-763e4.firebaseio.com',
