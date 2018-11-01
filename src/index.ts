@@ -1,2 +1,2 @@
 export {query} from './query';
-export {getAuthenticatedProjects, getCurrentProjectId} from './auth';
+export {getAuthenticatedProjects, getCurrentProject} from './auth';
