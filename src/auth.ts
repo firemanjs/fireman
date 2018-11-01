@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 const projectsDirPath = path.join(__dirname, 'projects');
-const cacheFilePath = path.join(__dirname, 'fireman-cache.json');
+const configFilePath = path.join(__dirname, 'fireman-config.json');
 
 const ensureProjectsDirCreated = () => {
   if (!fs.existsSync(projectsDirPath)) {
@@ -10,16 +10,19 @@ const ensureProjectsDirCreated = () => {
   }
 };
 
-export const getCurrentProjectId = (): string => {
-  if (fs.existsSync(cacheFilePath)) {
-    const cache = require(cacheFilePath);
-    console.log(cache);
-    return cache.currentProjectId;
+export const getCurrentProject = (): string => {
+  if (fs.existsSync(configFilePath)) {
+    return require(configFilePath);
   }
 };
 
-export const setCurrentProjectId = (id: string) => {
-
+export const setCurrentProject = (id: string, serviceAccountFilename: string) => {
+  if (fs.existsSync(configFilePath)) {
+    const config = require(configFilePath);
+    config.currentProjectId = id;
+    config.serviceAccountFilename = serviceAccountFilename;
+    fs.writeFileSync(configFilePath, JSON.stringify(config));
+  }
 };
 
 export const addProjectFile = (path: string): Promise<void> => {
@@ -28,7 +31,7 @@ export const addProjectFile = (path: string): Promise<void> => {
       fs.copyFile(path, projectsDirPath, error => {
         if (error) reject(error);
         const project = require(path);
-        setCurrentProjectId(project['project_id']);
+        setCurrentProject(project['project_id'], path);
         resolve();
       });
     }
