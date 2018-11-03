@@ -1,2 +1,2 @@
-export {query} from './query';
+export * from './firestore';
 export {getAuthenticatedProjects, getCurrentProject} from './auth';
