@@ -24,15 +24,23 @@ export const getQueryType = (components): QueryType =>
         QueryType.COLLECTION :
         QueryType.DOCUMENT;
 
+let firebaseAppsInitialized = [];
+
 export const parseQuery = (components) => {
   const currentProject = auth.getCurrentProject();
-  const serviceAccount = currentProject.serviceAccountFilename;
-  FirebaseAdmin.initializeApp({
-    credential: FirebaseAdmin.credential.cert(serviceAccount),
-    databaseURL: serviceAccount.databaseURL,
-  });
-  const firestore = FirebaseAdmin.firestore();
-  firestore.settings({timestampsInSnapshots: true});
+  let firestore: FirebaseFirestore.Firestore;
+  if (!firebaseAppsInitialized.includes(currentProject.currentProjectId)) {
+    const serviceAccount = currentProject.serviceAccountFilename;
+    FirebaseAdmin.initializeApp({
+      credential: FirebaseAdmin.credential.cert(serviceAccount),
+      databaseURL: serviceAccount.databaseURL,
+    }, currentProject.currentProjectId);
+    firebaseAppsInitialized.push(currentProject.currentProjectId);
+    firestore = FirebaseAdmin.firestore(FirebaseAdmin.app(currentProject.currentProjectId));
+    firestore.settings({timestampsInSnapshots: true});
+  }
+
+  firestore = FirebaseAdmin.firestore(FirebaseAdmin.app(currentProject.currentProjectId));
 
   let reference: any = firestore;
   let collection = true;
