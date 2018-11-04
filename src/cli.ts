@@ -14,6 +14,7 @@ const rl = readLine.createInterface({
 
 const parseQueries = async (input): Promise<void> => {
   if (input === 'exit') process.exit();
+  else if (input === '') return;
   const result = await Firestore.query(input);
 
   if (result instanceof Array) {
@@ -32,7 +33,11 @@ const parseQueries = async (input): Promise<void> => {
       }
     });
 
-    console.log(table(tableData));
+    if (tableData.length > 0) {
+      console.log(table(tableData));
+    } else {
+      console.log("No records found");
+    }
   }
 };
 
