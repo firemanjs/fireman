@@ -19,7 +19,8 @@ const parseQueries = async (input): Promise<void> => {
 
   if (result instanceof Array) {
     let tableData = [];
-    result.forEach(doc => {
+    for (let i = 0; i < result.length; ++i) {
+      const doc = result[i];
       let header = true;
       for (const prop in doc.data) {
         if (doc.data.hasOwnProperty(prop)) {
@@ -31,7 +32,9 @@ const parseQueries = async (input): Promise<void> => {
           }
         }
       }
-    });
+      const collections = await doc.getCollections();
+      tableData.push(["", "Collections", collections.map(c => c.id).join(', ')]);
+    }
 
     if (tableData.length > 0) {
       console.log(table(tableData));
