@@ -46,7 +46,7 @@ export const addProjectFile = (path: string): Promise<void> => {
         resolve();
       });
     } else {
-      reject("The file does not exists");
+      reject("the file does not exists");
     }
   });
 };
