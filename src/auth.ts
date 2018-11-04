@@ -10,7 +10,7 @@ const ensureProjectsDirCreated = () => {
   }
 };
 
-export const getCurrentProject = (): string => {
+export const getCurrentProject = (): any => {
   if (fs.existsSync(configFilePath)) {
     return require(configFilePath);
   }
@@ -25,15 +25,28 @@ export const setCurrentProject = (id: string, serviceAccountFilename: string) =>
   }
 };
 
+export const addCurrentProjectDb = (dbUrl: string) => {
+  const currentProject = getCurrentProject();
+
+  const serviceAccountFile = require(currentProject.serviceAccountFilename);
+
+  serviceAccountFile.dbUrl = dbUrl;
+  fs.writeFileSync(currentProject.serviceAccountFilename, JSON.stringify(serviceAccountFile));
+};
+
 export const addProjectFile = (path: string): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
     if (fs.existsSync(path)) {
-      fs.copyFile(path, projectsDirPath, error => {
+      const pathSplit = path.split('/');
+      let newFilePath = projectsDirPath + "/" + pathSplit[pathSplit.length - 1];
+      fs.copyFile(path, newFilePath, error => {
         if (error) reject(error);
-        const project = require(path);
-        setCurrentProject(project['project_id'], path);
+        const project = require(newFilePath);
+        setCurrentProject(project['project_id'], newFilePath);
         resolve();
       });
+    } else {
+      reject("the file does not exists");
     }
   });
 };
