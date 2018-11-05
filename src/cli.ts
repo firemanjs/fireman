@@ -73,7 +73,8 @@ commander.version('0.0.1');
 commander.command('firestore')
     .description('start fireman on firestore')
     .action(() => listenForQueries());
-commander.command("project:use", "use another project")
+commander.command("project:use")
+    .description("use another project")
     .action(async () => {
       const projects = auth.getAuthenticatedProjects();
       await inquirer.prompt({
@@ -90,7 +91,8 @@ commander.command("project:use", "use another project")
         process.exit(2);
       });
     });
-commander.command("project:remove", "remove a project")
+commander.command("project:remove")
+    .description("remove a project")
     .action(async () => {
       const projects = auth.getAuthenticatedProjects();
       await inquirer.prompt({
@@ -107,7 +109,8 @@ commander.command("project:remove", "remove a project")
         process.exit(2);
       });
     });
-commander.command("project:add <serviceAccountFilePath> <dbUrl>", "add project")
+commander.command("project:add <serviceAccountFilePath> <dbUrl>")
+    .description("add project")
     .action((serviceAccountFilePath, dbUrl) => {
       auth.addProjectFile(serviceAccountFilePath).then(() => {
         auth.addCurrentProjectDb(dbUrl);
