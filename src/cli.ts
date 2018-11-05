@@ -6,11 +6,33 @@ import * as Firestore from "./firestore";
 import * as commander from "commander";
 import {table} from 'table';
 import chalk from "chalk";
+import * as inquirer from 'inquirer';
 
 const rl = readLine.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
+
+const listenForQueries = () => {
+  const currentProject = auth.getCurrentProject();
+  if (!currentProject || !currentProject.serviceAccountFilename || !currentProject.currentProjectId) {
+    rl.question('Enter a service file path: ', input => {
+      auth.addProjectFile(input).then(_ => {
+        console.log("Project added");
+        rl.question('Enter the firestore database url: ', input => {
+          auth.addCurrentProjectDb(input);
+          console.log("Db added");
+          rl.on('line', parseQueries);
+        })
+      }).catch(error => {
+        console.error("Error adding project");
+        console.error(error);
+      })
+    })
+  } else {
+    rl.on('line', parseQueries);
+  }
+};
 
 const parseQueries = async (input): Promise<void> => {
   if (input === 'exit') process.exit();
@@ -44,38 +66,59 @@ const parseQueries = async (input): Promise<void> => {
   }
 };
 
-let command = false;
-commander.version('0.0.1')
-    .command("project add <serviceAccountFilePath> <dbUrl>", "")
-    .action((serviceAccountFilePath, dbUrl) => {
-      command = true;
-      console.log("command");
-      auth.addProjectFile(serviceAccountFilePath).then(_ => {
-        console.log("ok");
-        auth.addCurrentProjectDb(dbUrl);
-      }).catch(error => {
-        console.error("Error adding project", error);
+if (process.argv.length > 2) {
+  commander.version('0.0.1');
+  commander.command("project:use")
+      .description("use another project")
+      .action(async () => {
+        const projects = auth.getAuthenticatedProjects();
+        await inquirer.prompt({
+          type: "list",
+          name: "projectId",
+          message: "Select the project to use",
+          choices: projects.map(project => project.projectId),
+        }).then((ans: any) => {
+          const selectedProject = projects.find(project => project.projectId === ans.projectId);
+          auth.setCurrentProject(selectedProject.projectId, selectedProject.serviceAccountFilename);
+          listenForQueries();
+        }).catch(error => {
+          console.error("Error switching project", error);
+          process.exit(2);
+        });
       });
-    });
-commander.parse(process.argv);
-
-if (!command) {
-  const currentProject = auth.getCurrentProject();
-  if (!currentProject || !currentProject.serviceAccountFilename || !currentProject.currentProjectId) {
-    rl.question('Enter a service file path: ', input => {
-      auth.addProjectFile(input).then(_ => {
-        console.log("Project added");
-        rl.question('Enter the firestore database url: ', input => {
-          auth.addCurrentProjectDb(input);
-          console.log("Db added");
-          rl.on('line', parseQueries);
-        })
-      }).catch(error => {
-        console.error("Error adding project");
-        console.error(error);
-      })
-    })
-  } else {
-    rl.on('line', parseQueries);
-  }
+  commander.command("project:remove")
+      .description("remove a project")
+      .action(async () => {
+        console.log("REMOVE");
+        const projects = auth.getAuthenticatedProjects();
+        await inquirer.prompt({
+          type: "list",
+          name: "projectId",
+          message: "Select the project to remove",
+          choices: projects.map(project => project.projectId),
+        }).then(async (ans: any) => {
+          const selectedProject = projects.find(project => project.projectId === ans.projectId);
+          await auth.removeProject(selectedProject.projectId);
+          listenForQueries();
+        }).catch(error => {
+          console.error("Error switching project", error);
+          process.exit(2);
+        });
+      });
+  commander.command("project:add <serviceAccountFilePath> <dbUrl>")
+      .description("add project")
+      .action((serviceAccountFilePath, dbUrl) => {
+        auth.addProjectFile(serviceAccountFilePath).then(() => {
+          auth.addCurrentProjectDb(dbUrl);
+          console.log("Project added");
+          listenForQueries();
+        }).catch(error => {
+          console.error("Error adding project", error);
+          process.exit(1);
+        });
+      });
+  commander.usage("[command]");
+  commander.parse(process.argv);
+} else {
+  listenForQueries();
 }

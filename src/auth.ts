@@ -10,6 +10,15 @@ const ensureProjectsDirCreated = () => {
   }
 };
 
+const ensureConfigFileCreated = () => {
+  if (!fs.existsSync(configFilePath)) {
+    fs.writeFileSync(configFilePath, JSON.stringify({}));
+  }
+};
+
+ensureProjectsDirCreated();
+ensureConfigFileCreated();
+
 export const getCurrentProject = (): any => {
   if (fs.existsSync(configFilePath)) {
     return require(configFilePath);
@@ -51,14 +60,40 @@ export const addProjectFile = (path: string): Promise<void> => {
   });
 };
 
-export const getAuthenticatedProjects = (): string[] => {
+export const removeProject = (projectId: string): Promise<void> => {
+  return new Promise<void>((resolve, reject) => {
+    const projects = getAuthenticatedProjects();
+    const project = projects.find(p => p.projectId === projectId);
+    if (project) {
+      const currentProject = getCurrentProject();
+      if (currentProject.currentProjectId === project.projectId) {
+        const newProjects = projects.filter(p => p.projectId !== projectId);
+        if (newProjects.length > 0) {
+          setCurrentProject(newProjects[0].projectId, newProjects[0].serviceAccountFilename)
+        } else {
+          fs.writeFileSync(configFilePath, JSON.stringify({}));
+        }
+      }
+
+      fs.unlinkSync(project.serviceAccountFilename);
+    } else {
+      reject("the file does not exists");
+    }
+  });
+};
+
+export const getAuthenticatedProjects = (): any[] => {
   ensureProjectsDirCreated();
   const serviceAccountFiles = fs.readdirSync(projectsDirPath);
-  const projects: string[] = [];
+  const projects: any[] = [];
   if (serviceAccountFiles && serviceAccountFiles.length > 0) {
     for (const file of serviceAccountFiles) {
-      const project = require(path.join(projectsDirPath, file));
-      projects.push(project['project_id']);
+      const serviceAccountFilePath = path.join(projectsDirPath, file);
+      const project = require(serviceAccountFilePath);
+      projects.push({
+        projectId: project['project_id'],
+        serviceAccountFilename: serviceAccountFilePath,
+      });
     }
   }
   return projects;

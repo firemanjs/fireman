@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/Salvatore-Giordano/fireman-cli#readme",
   "dependencies": {
+    "@types/inquirer": "0.0.43",
     "chalk": "^2.4.1",
     "commander": "^2.19.0",
     "firebase-admin": "^6.1.0",
