@@ -62,7 +62,7 @@ const parseQueries = async (input): Promise<void> => {
 
     if (tableData.length > 0) {
       console.log(table(tableData));
-      console.log(`${chalk.redBright(result.length.toString())} ${result.length === 1 ? 'result' : 'results'} found`);
+      console.log(`${chalk.yellow(result.length.toString())} ${result.length === 1 ? 'result' : 'results'} found`);
     } else {
       console.log("No records found");
     }
@@ -73,8 +73,7 @@ commander.version('0.0.1');
 commander.command('firestore')
     .description('start fireman on firestore')
     .action(() => listenForQueries());
-commander.command("project:use")
-    .description("use another project")
+commander.command("project:use", "use another project")
     .action(async () => {
       const projects = auth.getAuthenticatedProjects();
       await inquirer.prompt({
@@ -91,10 +90,8 @@ commander.command("project:use")
         process.exit(2);
       });
     });
-commander.command("project:remove")
-    .description("remove a project")
+commander.command("project:remove", "remove a project")
     .action(async () => {
-      console.log("REMOVE");
       const projects = auth.getAuthenticatedProjects();
       await inquirer.prompt({
         type: "list",
@@ -110,8 +107,7 @@ commander.command("project:remove")
         process.exit(2);
       });
     });
-commander.command("project:add <serviceAccountFilePath> <dbUrl>")
-    .description("add project")
+commander.command("project:add <serviceAccountFilePath> <dbUrl>", "add project")
     .action((serviceAccountFilePath, dbUrl) => {
       auth.addProjectFile(serviceAccountFilePath).then(() => {
         auth.addCurrentProjectDb(dbUrl);
@@ -122,5 +118,6 @@ commander.command("project:add <serviceAccountFilePath> <dbUrl>")
         process.exit(1);
       });
     });
+
 commander.usage("<command>");
 commander.parse(process.argv);
