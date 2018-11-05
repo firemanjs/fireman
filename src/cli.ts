@@ -13,6 +13,11 @@ const rl = readLine.createInterface({
   output: process.stdout,
 });
 
+const commandError = () => {
+  console.error('Invalid command %s\nSee --help for a list of available commands.', commander.args.join(' '));
+  process.exit(1);
+};
+
 const listenForQueries = () => {
   const currentProject = auth.getCurrentProject();
   if (!currentProject || !currentProject.serviceAccountFilename || !currentProject.currentProjectId) {
@@ -69,7 +74,9 @@ const parseQueries = async (input): Promise<void> => {
   }
 };
 
+
 commander.version('0.0.1');
+commander.on('command:*', commandError);
 commander.command('firestore')
     .description('start fireman on firestore')
     .action(() => listenForQueries());
@@ -124,3 +131,7 @@ commander.command("project:add <serviceAccountFilePath> <dbUrl>")
 
 commander.usage("<command>");
 commander.parse(process.argv);
+
+if (process.argv.length <= 2) {
+  commandError();
+}
