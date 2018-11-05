@@ -55,11 +55,14 @@ const parseQueries = async (input): Promise<void> => {
         }
       }
       const collections = await doc.getCollections();
-      tableData.push(["", "Collections", collections.map(c => c.id).join(', ')]);
+      if (collections && collections.length > 0) {
+        tableData.push(["", "Collections", collections.map(c => c.id).join(', ')]);
+      }
     }
 
     if (tableData.length > 0) {
       console.log(table(tableData));
+      console.log(`${chalk.redBright(result.length.toString())} ${result.length === 1 ? 'result' : 'results'} found`);
     } else {
       console.log("No records found");
     }
