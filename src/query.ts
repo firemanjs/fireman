@@ -25,9 +25,12 @@ export const getQueryType = (components): QueryType =>
         QueryType.DOCUMENT;
 
 let firebaseAppsInitialized = [];
+let currentProject;
 
 export const parseQuery = (components) => {
-  const currentProject = auth.getCurrentProject();
+  if (!currentProject) {
+    currentProject = auth.getCurrentProject();
+  }
   let firestore: FirebaseFirestore.Firestore;
   if (!firebaseAppsInitialized.includes(currentProject.currentProjectId)) {
     const serviceAccount = currentProject.serviceAccountFilename;

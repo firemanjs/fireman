@@ -36,6 +36,7 @@ const listenForQueries = () => {
     })
   } else {
     rl.on('line', parseQueries);
+    console.log("🔥 Ready to get queries for project", chalk.yellow(currentProject.currentProjectId));
   }
 };
 
@@ -97,7 +98,7 @@ commander.command("project:use")
       }).then((ans: any) => {
         const selectedProject = projects.find(project => project.projectId === ans.projectId);
         auth.setCurrentProject(selectedProject.projectId, selectedProject.serviceAccountFilename);
-        listenForQueries();
+        // listenForQueries();
       }).catch(error => {
         console.error("Error switching project", error);
         process.exit(2);
@@ -115,7 +116,7 @@ commander.command("project:remove")
       }).then(async (ans: any) => {
         const selectedProject = projects.find(project => project.projectId === ans.projectId);
         await auth.removeProject(selectedProject.projectId);
-        listenForQueries();
+        // listenForQueries();
       }).catch(error => {
         console.error("Error switching project", error);
         process.exit(2);
