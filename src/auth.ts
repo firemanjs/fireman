@@ -33,23 +33,14 @@ export const setCurrentProject = (id: string) => {
   }
 };
 
-export const addCurrentProjectDb = (dbUrl: string) => {
-  const currentProject = getCurrentProject();
-
-  const path = Path.join(projectsDirPath, currentProject.currentProjectId);
-  const serviceAccountFile = require(path);
-
-  serviceAccountFile.dbUrl = dbUrl;
-  fs.writeFileSync(path + ".json", JSON.stringify(serviceAccountFile));
-};
-
-export const addProjectFile = (path: string): Promise<void> => {
+export const addProject = (path: string, dbUrl: string): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
     if (fs.existsSync(path)) {
       const project = require(path);
       const projectId = project['project_id'];
+      project.dbUrl = dbUrl;
       let newFilePath = Path.join(projectsDirPath, projectId + ".json");
-      fs.copyFile(path, newFilePath, error => {
+      fs.writeFile(newFilePath, JSON.stringify(project), error => {
         if (error) reject(error);
         setCurrentProject(projectId);
         resolve();

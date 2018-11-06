@@ -21,17 +21,15 @@ const commandError = () => {
 const listenForQueries = () => {
   const currentProject = auth.getCurrentProject();
   if (!currentProject || !currentProject.currentProjectId) {
-    rl.question('Enter a service file Path: ', input => {
-      auth.addProjectFile(input).then(() => {
-        console.log("Project added");
-        rl.question('Enter the firestore database url: ', input => {
-          auth.addCurrentProjectDb(input);
-          console.log("Db added");
+    rl.question('Enter a service file Path: ', serviceFilePath => {
+      rl.question('Enter the firestore database url: ', dbUrl => {
+        auth.addProject(serviceFilePath, dbUrl).then(() => {
+          console.log("Project added");
           rl.on('line', parseQueries);
+        }).catch(error => {
+          console.error("Error adding project");
+          console.error(error);
         })
-      }).catch(error => {
-        console.error("Error adding project");
-        console.error(error);
       })
     })
   } else {
@@ -129,10 +127,9 @@ commander.command("project:remove")
 commander.command("project:add <serviceAccountFilePath> <dbUrl>")
     .description("add project")
     .action((serviceAccountFilePath, dbUrl) => {
-      auth.addProjectFile(serviceAccountFilePath).then(() => {
-        auth.addCurrentProjectDb(dbUrl);
+      auth.addProject(serviceAccountFilePath, dbUrl).then(() => {
         console.log("Project added");
-        listenForQueries();
+        process.exit(0);
       }).catch(error => {
         console.error("Error adding project", error);
         process.exit(1);
