@@ -193,24 +193,24 @@ function peg$parse(input, options) {
       peg$c29 = peg$classExpectation(["/", "'"], true, false),
       peg$c30 = "\\",
       peg$c31 = peg$literalExpectation("\\", false),
-      peg$c32 = "==",
-      peg$c33 = peg$literalExpectation("==", false),
-      peg$c34 = "<=",
-      peg$c35 = peg$literalExpectation("<=", false),
-      peg$c36 = ">=",
-      peg$c37 = peg$literalExpectation(">=", false),
-      peg$c38 = "<",
-      peg$c39 = peg$literalExpectation("<", false),
-      peg$c40 = ">",
-      peg$c41 = peg$literalExpectation(">", false),
-      peg$c42 = "has",
-      peg$c43 = peg$literalExpectation("has", false),
+      peg$c32 = "has",
+      peg$c33 = peg$literalExpectation("has", false),
+      peg$c34 = "==",
+      peg$c35 = peg$literalExpectation("==", false),
+      peg$c36 = "<=",
+      peg$c37 = peg$literalExpectation("<=", false),
+      peg$c38 = ">=",
+      peg$c39 = peg$literalExpectation(">=", false),
+      peg$c40 = "<",
+      peg$c41 = peg$literalExpectation("<", false),
+      peg$c42 = ">",
+      peg$c43 = peg$literalExpectation(">", false),
       peg$c44 = function(field, operator, value) {
             return {
               type: 'where',
               field: field,
               value: value,
-              operator: operator === 'has' ? 'array_contains' : operator,
+              operator: operator === 'has' ? 'array-contains' : operator,
             };
           },
       peg$c45 = /^[^']/,
@@ -968,9 +968,9 @@ function peg$parse(input, options) {
   function peg$parseWhereOperator() {
     var s0;
 
-    if (input.substr(peg$currPos, 2) === peg$c32) {
+    if (input.substr(peg$currPos, 3) === peg$c32) {
       s0 = peg$c32;
-      peg$currPos += 2;
+      peg$currPos += 3;
     } else {
       s0 = peg$FAILED;
       if (peg$silentFails === 0) { peg$fail(peg$c33); }
@@ -992,15 +992,15 @@ function peg$parse(input, options) {
           if (peg$silentFails === 0) { peg$fail(peg$c37); }
         }
         if (s0 === peg$FAILED) {
-          if (input.charCodeAt(peg$currPos) === 60) {
+          if (input.substr(peg$currPos, 2) === peg$c38) {
             s0 = peg$c38;
-            peg$currPos++;
+            peg$currPos += 2;
           } else {
             s0 = peg$FAILED;
             if (peg$silentFails === 0) { peg$fail(peg$c39); }
           }
           if (s0 === peg$FAILED) {
-            if (input.charCodeAt(peg$currPos) === 62) {
+            if (input.charCodeAt(peg$currPos) === 60) {
               s0 = peg$c40;
               peg$currPos++;
             } else {
@@ -1008,9 +1008,9 @@ function peg$parse(input, options) {
               if (peg$silentFails === 0) { peg$fail(peg$c41); }
             }
             if (s0 === peg$FAILED) {
-              if (input.substr(peg$currPos, 3) === peg$c42) {
+              if (input.charCodeAt(peg$currPos) === 62) {
                 s0 = peg$c42;
-                peg$currPos += 3;
+                peg$currPos++;
               } else {
                 s0 = peg$FAILED;
                 if (peg$silentFails === 0) { peg$fail(peg$c43); }

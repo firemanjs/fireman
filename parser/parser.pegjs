@@ -65,7 +65,7 @@ Identifier
   = QuotedIdentifier / UnQuotedIdentifier
 
 WhereOperator
-  = "==" / "<=" / ">=" / "<" / ">" / "has"
+  =  "has" / "==" / "<=" / ">=" / "<" / ">"
 
 WhereClause
   = _ field:Identifier _ operator:WhereOperator _ value:WhereValue _ {
@@ -73,7 +73,7 @@ WhereClause
         type: 'where',
         field: field,
         value: value,
-        operator: operator === 'has' ? 'array_contains' : operator,
+        operator: operator === 'has' ? 'array-contains' : operator,
       };
     }
 
