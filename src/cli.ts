@@ -51,24 +51,26 @@ const parseQueries = async (input): Promise<void> => {
 
   if (result instanceof Array) {
     let tableData = [];
-    for (let i = 0; i < result.length; ++i) {
-      const doc = result[i];
+    (await Promise.all(result.map(async doc => {
+      let tableSection = [];
       let header = true;
       for (const prop in doc.data) {
         if (doc.data.hasOwnProperty(prop)) {
           if (header) {
             header = false;
-            tableData.push([chalk.bold.red(doc.id), chalk.bold.cyan(prop), doc.data[prop]]);
+            tableSection.push([chalk.bold.red(doc.id), chalk.bold.cyan(prop), doc.data[prop]]);
           } else {
-            tableData.push(["", chalk.bold.cyan(prop), doc.data[prop]]);
+            tableSection.push(["", chalk.bold.cyan(prop), doc.data[prop]]);
           }
         }
       }
       const collections = await doc.getCollections();
       if (collections && collections.length > 0) {
-        tableData.push(["", "Collections", collections.map(c => c.id).join(', ')]);
+        tableSection.push(["", "Collections", collections.map(c => c.id).join(', ')]);
       }
-    }
+
+      return tableSection;
+    }))).forEach(section => tableData.push(...section));
 
     if (tableData.length > 0) {
       console.log(table(tableData));
