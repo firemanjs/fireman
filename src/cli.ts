@@ -20,8 +20,8 @@ const commandError = () => {
 
 const listenForQueries = () => {
   const currentProject = auth.getCurrentProject();
-  if (!currentProject || !currentProject.serviceAccountFilename || !currentProject.currentProjectId) {
-    rl.question('Enter a service file path: ', input => {
+  if (!currentProject || !currentProject.currentProjectId) {
+    rl.question('Enter a service file Path: ', input => {
       auth.addProjectFile(input).then(() => {
         console.log("Project added");
         rl.question('Enter the firestore database url: ', input => {
@@ -43,7 +43,13 @@ const listenForQueries = () => {
 const parseQueries = async (input): Promise<void> => {
   if (input === 'exit') process.exit();
   else if (input === '') return;
-  const result = await Firestore.query(input);
+
+  let result;
+  try {
+    result = await Firestore.query(input);
+  } catch (e) {
+    console.error(chalk.red(e));
+  }
 
   if (result instanceof Array) {
     let tableData = [];
@@ -94,10 +100,9 @@ commander.command("project:use")
         type: "list",
         name: "projectId",
         message: "Select the project to use",
-        choices: projects.map(project => project.projectId),
+        choices: projects,
       }).then((ans: any) => {
-        const selectedProject = projects.find(project => project.projectId === ans.projectId);
-        auth.setCurrentProject(selectedProject.projectId, selectedProject.serviceAccountFilename);
+        auth.setCurrentProject(ans.projectId);
         // listenForQueries();
       }).catch(error => {
         console.error("Error switching project", error);
@@ -112,13 +117,12 @@ commander.command("project:remove")
         type: "list",
         name: "projectId",
         message: "Select the project to remove",
-        choices: projects.map(project => project.projectId),
+        choices: projects,
       }).then(async (ans: any) => {
-        const selectedProject = projects.find(project => project.projectId === ans.projectId);
-        await auth.removeProject(selectedProject.projectId);
+        await auth.removeProject(ans.projectId);
         // listenForQueries();
       }).catch(error => {
-        console.error("Error switching project", error);
+        console.error("Error removing project", error);
         process.exit(2);
       });
     });

@@ -1,8 +1,8 @@
 import * as fs from 'fs';
-import * as path from 'path';
+import * as Path from 'path';
 
-const projectsDirPath = path.join(__dirname, 'projects');
-const configFilePath = path.join(__dirname, 'fireman-config.json');
+const projectsDirPath = Path.join(__dirname, 'projects');
+const configFilePath = Path.join(__dirname, 'fireman-config.json');
 
 const ensureProjectsDirCreated = () => {
   if (!fs.existsSync(projectsDirPath)) {
@@ -25,11 +25,10 @@ export const getCurrentProject = (): any => {
   }
 };
 
-export const setCurrentProject = (id: string, serviceAccountFilename: string) => {
+export const setCurrentProject = (id: string) => {
   if (fs.existsSync(configFilePath)) {
     const config = require(configFilePath);
     config.currentProjectId = id;
-    config.serviceAccountFilename = serviceAccountFilename;
     fs.writeFileSync(configFilePath, JSON.stringify(config));
   }
 };
@@ -37,21 +36,22 @@ export const setCurrentProject = (id: string, serviceAccountFilename: string) =>
 export const addCurrentProjectDb = (dbUrl: string) => {
   const currentProject = getCurrentProject();
 
-  const serviceAccountFile = require(currentProject.serviceAccountFilename);
+  const path = Path.join(projectsDirPath, currentProject.currentProjectId);
+  const serviceAccountFile = require(path);
 
   serviceAccountFile.dbUrl = dbUrl;
-  fs.writeFileSync(currentProject.serviceAccountFilename, JSON.stringify(serviceAccountFile));
+  fs.writeFileSync(path + ".json", JSON.stringify(serviceAccountFile));
 };
 
 export const addProjectFile = (path: string): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
     if (fs.existsSync(path)) {
-      const pathSplit = path.split('/');
-      let newFilePath = projectsDirPath + "/" + pathSplit[pathSplit.length - 1];
+      const project = require(path);
+      const projectId = project['project_id'];
+      let newFilePath = Path.join(projectsDirPath, projectId + ".json");
       fs.copyFile(path, newFilePath, error => {
         if (error) reject(error);
-        const project = require(newFilePath);
-        setCurrentProject(project['project_id'], newFilePath);
+        setCurrentProject(projectId);
         resolve();
       });
     } else {
@@ -63,38 +63,30 @@ export const addProjectFile = (path: string): Promise<void> => {
 export const removeProject = (projectId: string): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
     const projects = getAuthenticatedProjects();
-    const project = projects.find(p => p.projectId === projectId);
+    const project = projects.find(p => p === projectId);
     if (project) {
       const currentProject = getCurrentProject();
-      if (currentProject.currentProjectId === project.projectId) {
-        const newProjects = projects.filter(p => p.projectId !== projectId);
+      if (currentProject.currentProjectId === project) {
+        const newProjects = projects.filter(p => p !== projectId);
         if (newProjects.length > 0) {
-          setCurrentProject(newProjects[0].projectId, newProjects[0].serviceAccountFilename)
+          setCurrentProject(newProjects[0])
         } else {
           fs.writeFileSync(configFilePath, JSON.stringify({}));
         }
       }
-
-      fs.unlinkSync(project.serviceAccountFilename);
+      fs.unlinkSync(Path.join(projectsDirPath, `${project}.json`));
     } else {
       reject("the file does not exists");
     }
   });
 };
 
-export const getAuthenticatedProjects = (): any[] => {
+export const getAuthenticatedProjects = (): string[] => {
   ensureProjectsDirCreated();
   const serviceAccountFiles = fs.readdirSync(projectsDirPath);
-  const projects: any[] = [];
+  let projects: string[] = [];
   if (serviceAccountFiles && serviceAccountFiles.length > 0) {
-    for (const file of serviceAccountFiles) {
-      const serviceAccountFilePath = path.join(projectsDirPath, file);
-      const project = require(serviceAccountFilePath);
-      projects.push({
-        projectId: project['project_id'],
-        serviceAccountFilename: serviceAccountFilePath,
-      });
-    }
+    projects = serviceAccountFiles.map(s => s.replace('.json', ''));
   }
   return projects;
 };

@@ -33,7 +33,7 @@ export const parseQuery = (components) => {
   }
   let firestore: FirebaseFirestore.Firestore;
   if (!firebaseAppsInitialized.includes(currentProject.currentProjectId)) {
-    const serviceAccount = currentProject.serviceAccountFilename;
+    const serviceAccount = require(`./projects/${currentProject.currentProjectId}`);
     FirebaseAdmin.initializeApp({
       credential: FirebaseAdmin.credential.cert(serviceAccount),
       databaseURL: serviceAccount.databaseURL,
