@@ -70,6 +70,11 @@ export const parseQuery = (components) => {
                   expressionComponent.operator,
                   expressionComponent.value,
               );
+            } else if (expressionComponent.type === 'order') {
+              reference = (<CollectionReference>reference).orderBy(
+                  expressionComponent.field,
+                  expressionComponent.direction === 1 ? 'asc' : 'desc',
+              );
             }
           }
         }
