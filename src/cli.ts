@@ -77,9 +77,14 @@ const parseQueries = async (input): Promise<void> => {
 
 commander.version('0.0.1');
 commander.on('command:*', commandError);
-commander.command('firestore')
+commander.command('firestore [query]')
     .description('start fireman on firestore')
-    .action(() => listenForQueries());
+    .action((query) => {
+      if (query)
+        return parseQueries(query).then(() => process.exit(0));
+      else
+        return listenForQueries();
+    });
 commander.command("project:use")
     .description("use another project")
     .action(async () => {
