@@ -33,6 +33,7 @@
     "commander": "^2.19.0",
     "firebase-admin": "^6.1.0",
     "inquirer": "^6.2.0",
+    "ora": "^3.0.0",
     "table": "^5.1.0"
   },
   "devDependencies": {

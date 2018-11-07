@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import * as ora from 'ora';
 import * as auth from './auth';
 import * as readLine from "readline";
 import * as Firestore from "./firestore/firestore";
@@ -34,7 +35,15 @@ const listenForQueries = () => {
       })
     })
   } else {
-    rl.on('line', parseQueries);
+    rl.on('line', (input) => {
+      const spinner = ora('Querying data');
+      spinner.start();
+
+      parseQueries(input).then(() => {
+        spinner.stop();
+      })
+
+    });
     console.log("🔥 Ready to get queries for project", chalk.yellow(currentProject.currentProjectId));
   }
 };
