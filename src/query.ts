@@ -28,6 +28,8 @@ let firebaseAppsInitialized = [];
 let currentProject;
 
 export const parseQuery = (components) => {
+  let documentExpression = false;
+
   if (!currentProject) {
     currentProject = auth.getCurrentProject();
   }
@@ -84,12 +86,14 @@ export const parseQuery = (components) => {
         break;
       case ComponentType.DOCUMENT_EXPRESSION:
         specificProperties = component.components;
+        documentExpression = true;
         break;
     }
   }
   return {
     reference,
     specificProperties,
+    documentExpression,
   };
 };
 

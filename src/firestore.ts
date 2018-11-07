@@ -11,11 +11,11 @@ import * as FirebaseAdmin from 'firebase-admin';
  * @param queryString The FiremanQL query
  * @param onChangeListener The optional listener for changes (if this is provided then nothing is returned in the promise)
  */
-export const query = async (queryString: string, onChangeListener?: onChangeListener): Promise<Document[] | void> => {
+export const query = async (queryString: string, onChangeListener?: onChangeListener): Promise<QueryResult> => {
   try {
     const queryComponents = FQLParser.parse(queryString);
     const queryType: QueryType = getQueryType(queryComponents);
-    const {reference, specificProperties} = parseQuery(queryComponents);
+    const {reference, specificProperties, documentExpression} = parseQuery(queryComponents);
 
     if (onChangeListener) {
       if (queryType === QueryType.DOCUMENT) {
@@ -42,7 +42,8 @@ export const query = async (queryString: string, onChangeListener?: onChangeList
         }, error => onChangeListener(null, error));
       }
     } else {
-      return await getResult(queryType, reference, specificProperties);
+      const result = await getResult(queryType, reference, specificProperties);
+      return new QueryResult(result, documentExpression);
     }
   } catch (e) {
     onChangeListener && onChangeListener(null, e);
@@ -97,5 +98,11 @@ export class Collection {
     collection.queryRef = reference.path;
     // TODO collection.get = () => reference.listDocuments();
     return collection;
+  }
+}
+
+
+export class QueryResult {
+  constructor(public data: Document[], public documentExpression: boolean) {
   }
 }

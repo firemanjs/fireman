@@ -7,6 +7,7 @@ import * as commander from "commander";
 import {table} from 'table';
 import chalk from "chalk";
 import * as inquirer from 'inquirer';
+import {QueryResult} from "./firestore";
 
 const rl = readLine.createInterface({
   input: process.stdin,
@@ -42,42 +43,43 @@ const parseQueries = async (input): Promise<void> => {
   if (input === 'exit') process.exit();
   else if (input === '') return;
 
-  let result;
+  let result: QueryResult;
   try {
     result = await Firestore.query(input);
   } catch (e) {
     console.error(chalk.red(e));
   }
 
-  if (result instanceof Array) {
-    let tableData = [];
-    (await Promise.all(result.map(async doc => {
-      let tableSection = [];
-      let header = true;
-      for (const prop in doc.data) {
-        if (doc.data.hasOwnProperty(prop)) {
-          if (header) {
-            header = false;
-            tableSection.push([chalk.bold.red(doc.id), chalk.bold.cyan(prop), doc.data[prop]]);
-          } else {
-            tableSection.push(["", chalk.bold.cyan(prop), doc.data[prop]]);
-          }
+  let tableData = [];
+  (await Promise.all(result.data.map(async doc => {
+    let tableSection = [];
+    let header = true;
+    for (const prop in doc.data) {
+      if (doc.data.hasOwnProperty(prop)) {
+        if (header) {
+          header = false;
+          tableSection.push([chalk.bold.red(doc.id), chalk.bold.cyan(prop), doc.data[prop]]);
+        } else {
+          tableSection.push(["", chalk.bold.cyan(prop), doc.data[prop]]);
         }
       }
+    }
+
+    if (!result.documentExpression) {
       const collections = await doc.getCollections();
       if (collections && collections.length > 0) {
         tableSection.push(["", "Collections", collections.map(c => c.id).join(', ')]);
       }
-
-      return tableSection;
-    }))).forEach(section => tableData.push(...section));
-
-    if (tableData.length > 0) {
-      console.log(table(tableData));
-      console.log(`${chalk.yellow(result.length.toString())} ${result.length === 1 ? 'result' : 'results'} found`);
-    } else {
-      console.log("No records found");
     }
+
+    return tableSection;
+  }))).forEach(section => tableData.push(...section));
+
+  if (tableData.length > 0) {
+    console.log(table(tableData));
+    console.log(`${chalk.yellow(result.data.length.toString())} ${result.data.length === 1 ? 'result' : 'results'} found`);
+  } else {
+    console.log("No records found");
   }
 };
 
