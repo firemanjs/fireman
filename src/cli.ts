@@ -36,7 +36,7 @@ const listenForQueries = () => {
     })
   } else {
     rl.on('line', (input) => {
-      const spinner = ora('Querying data');
+      const spinner = ora('Querying data\n');
       spinner.start();
 
       parseQueries(input).then(() => {
@@ -86,7 +86,7 @@ const parseQueries = async (input): Promise<void> => {
 
   if (tableData.length > 0) {
     console.log(table(tableData));
-    console.log(`${chalk.yellow(result.data.length.toString())} ${result.data.length === 1 ? 'result' : 'results'} found`);
+    console.log(`${chalk.yellow(result.data.length.toString())} ${result.data.length === 1 ? 'result' : 'results'} found\n`);
   } else {
     console.log("No records found");
   }
