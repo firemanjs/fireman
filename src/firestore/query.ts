@@ -102,18 +102,9 @@ export const parseQuery = (components) => {
 
 export const getResult = async (queryString: string, queryType, reference: any, specificProperties: string[]): Promise<Document[]> => {
   let documents: Document[] = [];
-  let snapshot;
-
-  if (cache[queryString]) {
-    if (reference.isEqual(cache[queryString].reference)) {
-      return cache[queryString].documents;
-    } else {
-    }
-    cache[queryString] = undefined;
-  }
 
   if (queryType === QueryType.DOCUMENT) {
-    snapshot = await reference.get();
+    const snapshot = await reference.get();
     if (snapshot.exists) {
       const document: Document = Document.fromDocumentReference(reference);
       document.setData(snapshot, specificProperties);
@@ -122,20 +113,12 @@ export const getResult = async (queryString: string, queryType, reference: any, 
       throw new Error('No such document');
     }
   } else {
-    snapshot = await reference.get();
+    const snapshot = await reference.get();
     snapshot.forEach((docSnapshot: QueryDocumentSnapshot) => {
       const document: Document = Document.fromDocumentReference(docSnapshot.ref);
       document.setData(docSnapshot, specificProperties);
       documents.push(document);
     });
   }
-
-  if (!cache[queryString]) {
-    cache[queryString] = {
-      reference: reference,
-      documents: documents,
-    };
-  }
-
   return documents;
 };

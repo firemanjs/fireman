@@ -8,7 +8,6 @@
   },
   "types": "dist/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npx tsc",
     "build:parser": "npx pegjs ./parser/parser.pegjs"
   },
@@ -19,10 +18,13 @@
   "keywords": [
     "fireman",
     "firebase",
-    "firestore"
+    "firestore",
+    "firebase",
+    "database",
+    "tools"
   ],
   "author": "Salvatore Giordano",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/Salvatore-Giordano/fireman-cli/issues"
   },
