@@ -2,8 +2,8 @@ import * as FirebaseAdmin from 'firebase-admin';
 import {DocumentSnapshot, QueryDocumentSnapshot, QuerySnapshot} from '@google-cloud/firestore';
 import CollectionReference = FirebaseAdmin.firestore.CollectionReference;
 import {Document} from "./firestore";
-import * as auth from "./auth";
-import {cache} from "./cache";
+import * as auth from "../auth";
+import {cache} from "../cache";
 
 export type onChangeListener = (result: Document[], error: Error) => void;
 
@@ -36,7 +36,7 @@ export const parseQuery = (components) => {
     currentProject = auth.getCurrentProject();
   }
   if (!firebaseAppsInitialized.includes(currentProject.currentProjectId)) {
-    const serviceAccount = require(`./projects/${currentProject.currentProjectId}`);
+    const serviceAccount = require(`../projects/${currentProject.currentProjectId}`);
     FirebaseAdmin.initializeApp({
       credential: FirebaseAdmin.credential.cert(serviceAccount),
       databaseURL: serviceAccount.databaseURL,
@@ -102,15 +102,10 @@ export const getResult = async (queryString: string, queryType, reference: any, 
   let documents: Document[] = [];
   let snapshot;
 
-  console.log(JSON.stringify(cache));
-
   if (cache[queryString]) {
-    console.log("CACHE ?");
     if (reference.isEqual(cache[queryString].reference)) {
-      console.log("CACHE HIT");
       return cache[queryString].documents;
     } else {
-      console.log("NO CACHE HIT");
     }
     cache[queryString] = undefined;
   }

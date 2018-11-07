@@ -1,5 +1,5 @@
 import {getQueryType, getResult, onChangeListener, parseQuery, QueryType} from "./query";
-import * as FQLParser from '../parser/parser';
+import * as FQLParser from '../../parser/parser';
 import {DocumentSnapshot, QueryDocumentSnapshot, QuerySnapshot} from '@google-cloud/firestore';
 import CollectionReference = FirebaseAdmin.firestore.CollectionReference;
 import DocumentReference = FirebaseAdmin.firestore.DocumentReference;

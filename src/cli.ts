@@ -2,12 +2,12 @@
 
 import * as auth from './auth';
 import * as readLine from "readline";
-import * as Firestore from "./firestore";
+import * as Firestore from "./firestore/firestore";
 import * as commander from "commander";
 import {table} from 'table';
 import chalk from "chalk";
 import * as inquirer from 'inquirer';
-import {QueryResult} from "./firestore";
+import {QueryResult} from "./firestore/firestore";
 
 const rl = readLine.createInterface({
   input: process.stdin,
