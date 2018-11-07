@@ -1,11 +1,10 @@
 import * as FirebaseAdmin from 'firebase-admin';
 import {DocumentSnapshot, QueryDocumentSnapshot, QuerySnapshot} from '@google-cloud/firestore';
 import CollectionReference = FirebaseAdmin.firestore.CollectionReference;
-import {Document} from "./firestore";
+import {Document, QueryResult} from "./firestore";
 import * as auth from "../auth";
-import {cache} from "../cache";
 
-export type onChangeListener = (result: Document[], error: Error) => void;
+export type onChangeListener = (result: QueryResult, error: Error) => void;
 
 export enum ComponentType {
   LITERAL = 'literal',

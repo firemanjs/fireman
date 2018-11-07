@@ -6,6 +6,8 @@ import DocumentReference = FirebaseAdmin.firestore.DocumentReference;
 
 import * as FirebaseAdmin from 'firebase-admin';
 
+export let unsubscribeListener;
+
 /**
  * Runs a query against Firebase database
  * @param queryString The FiremanQL query
@@ -19,17 +21,17 @@ export const query = async (queryString: string, onChangeListener?: onChangeList
 
     if (onChangeListener) {
       if (queryType === QueryType.DOCUMENT) {
-        reference.onSnapshot((snapshot: DocumentSnapshot) => {
+        unsubscribeListener = reference.onSnapshot((snapshot: DocumentSnapshot) => {
           if (snapshot.exists) {
             let document: Document = Document.fromDocumentReference(snapshot.ref);
             document.setData(snapshot, specificProperties);
-            onChangeListener([document], null);
+            onChangeListener(new QueryResult([document], specificProperties.length > 0), null);
           } else {
             onChangeListener(null, Error('No such document'));
           }
         }, error => onChangeListener(null, error));
       } else {
-        reference.onSnapshot((snapshot: QuerySnapshot) => {
+        unsubscribeListener = reference.onSnapshot((snapshot: QuerySnapshot) => {
           let documents: Document[] = [];
           snapshot.forEach((documentSnapshot: QueryDocumentSnapshot) => {
             if (documentSnapshot.exists) {
@@ -38,7 +40,7 @@ export const query = async (queryString: string, onChangeListener?: onChangeList
               documents.push(document);
             }
           });
-          onChangeListener(documents, null);
+          onChangeListener(new QueryResult(documents, specificProperties.length > 0), null);
         }, error => onChangeListener(null, error));
       }
     } else {
