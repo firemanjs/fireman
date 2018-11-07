@@ -20,6 +20,7 @@ const commandError = () => {
   process.exit(1);
 };
 
+let spinner;
 const listenForQueries = () => {
   const currentProject = auth.getCurrentProject();
   if (!currentProject || !currentProject.currentProjectId) {
@@ -39,12 +40,11 @@ const listenForQueries = () => {
 
       unsubscribeListener && unsubscribeListener();
 
-      const spinner = ora('Querying data\n');
-      spinner.start();
+      spinner = ora('Querying data\n').start();
 
       const s = input.split(' ');
       if (s[s.length - 1] === '-l') {
-        parseQueries(input.replace(' -l',''), true).then(() => {
+        parseQueries(input.replace(' -l', ''), true).then(() => {
           spinner.stop();
         });
       } else {
@@ -83,6 +83,7 @@ async function printResult(result: QueryResult) {
     return tableSection;
   }))).forEach(section => tableData.push(...section));
 
+  spinner.stop();
   if (tableData.length > 0) {
     console.log(table(tableData));
     console.log(`${chalk.yellow(result.data.length.toString())} ${result.data.length === 1 ? 'result' : 'results'} found\n`);
@@ -99,6 +100,7 @@ const parseQueries = async (input, listen?: boolean): Promise<void> => {
     if (listen) {
       await Firestore.query(input, (result, error) => {
         if (error) {
+          spinner.stop();
           console.error(chalk.red(error.message));
           return;
         }
@@ -110,6 +112,7 @@ const parseQueries = async (input, listen?: boolean): Promise<void> => {
       await printResult(result);
     }
   } catch (e) {
+    spinner.stop();
     console.error(chalk.red(e));
   }
 };
