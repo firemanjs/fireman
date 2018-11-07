@@ -118,6 +118,15 @@ Plus
 Digit
   = [0-9]
 
+LimitClause
+  = "#" _ limit:Number {
+      return {
+          type: 'limit',
+          limit: limit,
+        };
+    }
+
+
 OrderClause
   = orderSymbol:("^" / "_") field:Identifier {
       return {
@@ -136,7 +145,7 @@ CollectionExpression
     }
 
 PathExpressionComponent
-  = component:(WhereClause / OrderClause) _ ","? _ {
+  = component:(OrderClause / LimitClause / WhereClause) _ ","? _ {
       return component;
     }
 

@@ -76,6 +76,8 @@ export const parseQuery = (components) => {
                   expressionComponent.operator,
                   expressionComponent.value,
               );
+            } else if (expressionComponent.type === 'limit') {
+              reference = (<CollectionReference>reference).limit(expressionComponent.limit);
             } else if (expressionComponent.type === 'order') {
               reference = (<CollectionReference>reference).orderBy(
                   expressionComponent.field,
