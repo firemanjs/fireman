@@ -3,6 +3,7 @@ import {DocumentSnapshot, QueryDocumentSnapshot, QuerySnapshot} from '@google-cl
 import CollectionReference = FirebaseAdmin.firestore.CollectionReference;
 import {Document} from "./firestore";
 import * as auth from "./auth";
+import {cache} from "./cache";
 
 export type onChangeListener = (result: Document[], error: Error) => void;
 
@@ -26,6 +27,7 @@ export const getQueryType = (components): QueryType =>
 
 let firebaseAppsInitialized = [];
 let currentProject;
+let firestore: FirebaseFirestore.Firestore;
 
 export const parseQuery = (components) => {
   let documentExpression = false;
@@ -33,7 +35,6 @@ export const parseQuery = (components) => {
   if (!currentProject) {
     currentProject = auth.getCurrentProject();
   }
-  let firestore: FirebaseFirestore.Firestore;
   if (!firebaseAppsInitialized.includes(currentProject.currentProjectId)) {
     const serviceAccount = require(`./projects/${currentProject.currentProjectId}`);
     FirebaseAdmin.initializeApp({
@@ -97,10 +98,25 @@ export const parseQuery = (components) => {
   };
 };
 
-export const getResult = async (queryType, reference: any, specificProperties: string[]): Promise<Document[]> => {
+export const getResult = async (queryString: string, queryType, reference: any, specificProperties: string[]): Promise<Document[]> => {
   let documents: Document[] = [];
+  let snapshot;
+
+  console.log(JSON.stringify(cache));
+
+  if (cache[queryString]) {
+    console.log("CACHE ?");
+    if (reference.isEqual(cache[queryString].reference)) {
+      console.log("CACHE HIT");
+      return cache[queryString].documents;
+    } else {
+      console.log("NO CACHE HIT");
+    }
+    cache[queryString] = undefined;
+  }
+
   if (queryType === QueryType.DOCUMENT) {
-    const snapshot: DocumentSnapshot = await reference.get();
+    snapshot = await reference.get();
     if (snapshot.exists) {
       const document: Document = Document.fromDocumentReference(reference);
       document.setData(snapshot, specificProperties);
@@ -109,12 +125,20 @@ export const getResult = async (queryType, reference: any, specificProperties: s
       throw new Error('No such document');
     }
   } else {
-    const snapshot = await reference.get();
+    snapshot = await reference.get();
     snapshot.forEach((docSnapshot: QueryDocumentSnapshot) => {
       const document: Document = Document.fromDocumentReference(docSnapshot.ref);
       document.setData(docSnapshot, specificProperties);
       documents.push(document);
     });
   }
+
+  if (!cache[queryString]) {
+    cache[queryString] = {
+      reference: reference,
+      documents: documents,
+    };
+  }
+
   return documents;
 };

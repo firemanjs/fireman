@@ -42,7 +42,7 @@ export const query = async (queryString: string, onChangeListener?: onChangeList
         }, error => onChangeListener(null, error));
       }
     } else {
-      const result = await getResult(queryType, reference, specificProperties);
+      const result = await getResult(queryString, queryType, reference, specificProperties);
       return new QueryResult(result, documentExpression);
     }
   } catch (e) {
