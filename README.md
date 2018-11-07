@@ -5,7 +5,7 @@ A desktop client for Firebase databases that makes querying and managing easy.
 ## Install
 
 > 🛠This package is still in early stage of development thus is not yet published to npm.  
-> Until then you can try it by cloning this repository and following [build](https://github.com/Salvatore-Giordano/fireman-cli/wiki/build) instructions.
+> Until then you can try it by cloning this repository and following [build](https://github.com/Salvatore-Giordano/fireman-cli/wiki/Build) instructions.
 
 To install run
 
