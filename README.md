@@ -1,4 +1,4 @@
-<img src="logo.png" height="250">
+<img src="logo.png" width="250">
 
 A cli and desktop client for Firebase databases that makes querying and managing easy.
 
