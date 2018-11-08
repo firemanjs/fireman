@@ -1,6 +1,6 @@
 # Fireman
 
-A desktop client for Firebase databases that makes querying and managing easy.
+A cli and desktop client for Firebase databases that makes querying and managing easy.
 
 ## Install
 
