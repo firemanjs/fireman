@@ -23,7 +23,7 @@ Once installed, this package exposes the `fireman` command.
 
 ### Commands documentation
 
-##### `project:add <serviceAccountKeyPath> <dburl>`
+##### `fireman project:add <serviceAccountKeyPath> <dburl>`
 
 Adds a Firebase project to your environment.
 
