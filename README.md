@@ -1,4 +1,4 @@
-![Fireman logo](logo.png)
+<img src="logo.png" height="250">
 
 A cli and desktop client for Firebase databases that makes querying and managing easy.
 
