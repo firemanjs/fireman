@@ -78,15 +78,12 @@ const getQueryType = (components): QueryType =>
         QueryType.DOCUMENT;
 
 let firebaseAppsInitialized = [];
-let currentProject: string;
 let firestore: FirebaseFirestore.Firestore;
 
 const parseQuery = (components) => {
   let documentExpression = false;
 
-  if (!currentProject) {
-    currentProject = auth.getCurrentProject();
-  }
+  const currentProject = auth.getCurrentProject();
   if (!firebaseAppsInitialized.includes(currentProject)) {
     const serviceAccount = require(`../projects/${currentProject}`);
     FirebaseAdmin.initializeApp({

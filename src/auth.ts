@@ -19,7 +19,11 @@ const ensureConfigFileCreated = () => {
 ensureProjectsDirCreated();
 ensureConfigFileCreated();
 
+let currentProject: string;
+
 export const getCurrentProject = (): string => {
+  if (currentProject) return currentProject;
+
   if (fs.existsSync(configFilePath)) {
     return require(configFilePath).currentProjectId;
   }
@@ -30,6 +34,7 @@ export const setCurrentProject = (id: string) => {
     const config = require(configFilePath);
     config.currentProjectId = id;
     fs.writeFileSync(configFilePath, JSON.stringify(config));
+    currentProject = id;
   }
 };
 
