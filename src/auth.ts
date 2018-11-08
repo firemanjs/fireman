@@ -19,9 +19,9 @@ const ensureConfigFileCreated = () => {
 ensureProjectsDirCreated();
 ensureConfigFileCreated();
 
-export const getCurrentProject = (): any => {
+export const getCurrentProject = (): string => {
   if (fs.existsSync(configFilePath)) {
-    return require(configFilePath);
+    return require(configFilePath).currentProjectId;
   }
 };
 
@@ -42,7 +42,11 @@ export const addProject = (path: string, dbUrl: string): Promise<void> => {
       let newFilePath = Path.join(projectsDirPath, projectId + ".json");
       fs.writeFile(newFilePath, JSON.stringify(project), error => {
         if (error) reject(error);
-        setCurrentProject(projectId);
+
+        if (getAuthenticatedProjects().length === 1) {
+          setCurrentProject(projectId);
+        }
+
         resolve();
       });
     } else {
@@ -54,10 +58,10 @@ export const addProject = (path: string, dbUrl: string): Promise<void> => {
 export const removeProject = (projectId: string): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
     const projects = getAuthenticatedProjects();
-    const project = projects.find(p => p === projectId);
+    const project = projects.find(project => project === projectId);
     if (project) {
       const currentProject = getCurrentProject();
-      if (currentProject.currentProjectId === project) {
+      if (currentProject === project) {
         const newProjects = projects.filter(p => p !== projectId);
         if (newProjects.length > 0) {
           setCurrentProject(newProjects[0])
@@ -67,13 +71,12 @@ export const removeProject = (projectId: string): Promise<void> => {
       }
       fs.unlinkSync(Path.join(projectsDirPath, `${project}.json`));
     } else {
-      reject("the file does not exists");
+      reject("the project does not exists");
     }
   });
 };
 
 export const getAuthenticatedProjects = (): string[] => {
-  ensureProjectsDirCreated();
   const serviceAccountFiles = fs.readdirSync(projectsDirPath);
   let projects: string[] = [];
   if (serviceAccountFiles && serviceAccountFiles.length > 0) {
