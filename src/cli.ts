@@ -29,7 +29,7 @@ const listenForQueries = () => {
       rl.question('Enter the firestore database url: ', dbUrl => {
         auth.addProject(serviceFilePath, dbUrl).then(() => {
           console.log("Project added");
-          rl.on('line', parseQueries);
+          rl.on('line', executeQuery);
         }).catch(error => {
           console.error("Error adding project");
           console.error(error);
@@ -37,21 +37,18 @@ const listenForQueries = () => {
       })
     })
   } else {
-    rl.on('line', (input: string) => {
+    rl.on('line', async (input: string) => {
 
       unsubscribeListener && unsubscribeListener();
 
-      spinner = ora('Querying data\n').start();
+      if (input === 'exit') process.exit();
+      else if (input === '') return;
 
       const s = input.split(' ');
       if (s[s.length - 1] === '-l') {
-        parseQueries(input.replace(' -l', ''), true).then(() => {
-          spinner.stop();
-        });
+        await executeQuery(input.replace(' -l', ''), true);
       } else {
-        parseQueries(input).then(() => {
-          spinner.stop();
-        });
+        await executeQuery(input);
       }
     });
     console.log("🔥 Ready to get queries for project", chalk.yellow(currentProject));
@@ -84,7 +81,6 @@ async function printResult(result: QueryResult) {
     return tableSection;
   }))).forEach(section => tableData.push(...section));
 
-  spinner.stop();
   if (tableData.length > 0) {
     console.log(table(tableData));
     console.log(`${chalk.yellow(result.data.length.toString())} ${result.data.length === 1 ? 'result' : 'results'} found\n`);
@@ -93,29 +89,31 @@ async function printResult(result: QueryResult) {
   }
 }
 
-const parseQueries = async (input, listen?: boolean): Promise<void> => {
-  if (input === 'exit') process.exit();
-  else if (input === '') return;
+async function getResult(listen: boolean, input) {
+  if (listen) {
+    await Firestore.query(input, async (result, error) => {
+      if (error) {
+        throw error.message;
+      }
+
+      return result;
+    });
+  } else {
+    const result = await Firestore.query(input);
+
+    if (result) {
+      return result;
+    }
+  }
+}
+
+const executeQuery = async (input, listen?: boolean): Promise<void> => {
+  spinner = ora('Querying data\n').start();
 
   try {
-    if (listen) {
-      await Firestore.query(input, (result, error) => {
-        if (!result) return;
-        if (error) {
-          spinner.stop();
-          console.error(chalk.red(error.message));
-          return;
-        }
-
-        printResult(result);
-      });
-    } else {
-      const result = await Firestore.query(input);
-
-      if (result) {
-        await printResult(result);
-      }
-    }
+    const result = await getResult(listen, input);
+    spinner.stop();
+    if (result) await printResult(result);
   } catch (e) {
     spinner.stop();
     console.error(chalk.red(e));
@@ -129,7 +127,7 @@ commander.command('firestore [query]')
     .description('start fireman on firestore')
     .action((query) => {
       if (query)
-        return parseQueries(query, true).then(() => process.exit(0));
+        return executeQuery(query, true).then(() => process.exit(0));
       else
         return listenForQueries();
     });

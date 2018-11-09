@@ -63,8 +63,11 @@ function checkNotEqualComponent(queries) {
   }
 }
 
-
+/**
+ * This is useful in case of multiple queries and listeners, to avoid to trigger multiple listeners everytime
+ */
 let queryLock = false;
+
 /**
  * Runs a query against Firebase database
  * @param queryString The FiremanQL query
@@ -73,6 +76,7 @@ let queryLock = false;
 export const query = async (queryString: string, onChangeListener?: onChangeListener): Promise<QueryResult> => {
   if (queryLock) return;
   queryLock = true;
+
   try {
     let queries = [FQLParser.parse(queryString)];
 
