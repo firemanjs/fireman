@@ -8,7 +8,8 @@ import * as commander from "commander";
 import {table} from 'table';
 import chalk from "chalk";
 import * as inquirer from 'inquirer';
-import {QueryResult, unsubscribeListener} from "./firestore/firestore";
+import {unsubscribeListener} from "./firestore/firestore";
+import {QueryResult} from './firestore/query-result';
 
 const rl = readLine.createInterface({
   input: process.stdin,
@@ -23,7 +24,7 @@ const commandError = () => {
 let spinner;
 const listenForQueries = () => {
   const currentProject = auth.getCurrentProject();
-  if (!currentProject || !currentProject.currentProjectId) {
+  if (!currentProject) {
     rl.question('Enter a service file Path: ', serviceFilePath => {
       rl.question('Enter the firestore database url: ', dbUrl => {
         auth.addProject(serviceFilePath, dbUrl).then(() => {
@@ -53,7 +54,7 @@ const listenForQueries = () => {
         });
       }
     });
-    console.log("🔥 Ready to get queries for project", chalk.yellow(currentProject.currentProjectId));
+    console.log("🔥 Ready to get queries for project", chalk.yellow(currentProject));
   }
 };
 
@@ -109,7 +110,10 @@ const parseQueries = async (input, listen?: boolean): Promise<void> => {
       });
     } else {
       const result = await Firestore.query(input);
-      await printResult(result);
+
+      if (result) {
+        await printResult(result);
+      }
     }
   } catch (e) {
     spinner.stop();
