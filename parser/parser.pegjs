@@ -40,7 +40,7 @@ _ "whitespace"
   = [ \t\n\r]*
 
 UnQuotedIdentifier
-  = $[^\/\{\}\[\]\<\>\= ,\^_.]+
+  = $[^\/\{\}\[\]\<\>\= ,\^_.!]+
 
 QuotedIdentifier
   = DoubleQuotedIdentifier / SingleQuotedIdentifier
