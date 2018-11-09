@@ -100,6 +100,7 @@ const parseQueries = async (input, listen?: boolean): Promise<void> => {
   try {
     if (listen) {
       await Firestore.query(input, (result, error) => {
+        if (!result) return;
         if (error) {
           spinner.stop();
           console.error(chalk.red(error.message));

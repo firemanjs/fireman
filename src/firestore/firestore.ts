@@ -10,26 +10,103 @@ export let unsubscribeListener;
 
 export type onChangeListener = (result: QueryResult, error: Error) => void;
 
+function checkNotEqualComponent(queries) {
+  let notEqualComponent;
+  queries[0].forEach(component => {
+    if (component.type === ComponentType.COLLECTION_EXPRESSION) {
+      component.components.forEach(c => {
+        if (c.type === 'where' && c.operator === '!=') {
+          notEqualComponent = c;
+        }
+      });
+    }
+  });
+
+  if (notEqualComponent) {
+    queries[1] = queries[0].map(component => {
+      if (component.type === ComponentType.COLLECTION_EXPRESSION) {
+        let modifiedComponent = {...component};
+        modifiedComponent.components = modifiedComponent.components.map(c => {
+          if (c === notEqualComponent) {
+            c = {
+              'type': 'where',
+              'field': c.field,
+              'operator': '<',
+              'value': c.value,
+            }
+          }
+          return c;
+        });
+        return modifiedComponent;
+      }
+
+      return component;
+    });
+
+    queries[0] = queries[0].map(component => {
+      if (component.type === ComponentType.COLLECTION_EXPRESSION) {
+        component.components = component.components.map(c => {
+          if (c === notEqualComponent) {
+            c = {
+              'type': 'where',
+              'field': c.field,
+              'operator': '>',
+              'value': c.value,
+            }
+          }
+          return c;
+        });
+      }
+
+      return component;
+    });
+  }
+}
+
+
+let queryLock = false;
 /**
  * Runs a query against Firebase database
  * @param queryString The FiremanQL query
  * @param onChangeListener The optional listener for changes (if this is provided then nothing is returned in the promise)
  */
-export const query = async (queryString: string, onChangeListener?: onChangeListener): Promise<QueryResult | void> => {
+export const query = async (queryString: string, onChangeListener?: onChangeListener): Promise<QueryResult> => {
+  if (queryLock) return;
+  queryLock = true;
   try {
-    const queryComponents = FQLParser.parse(queryString);
-    const queryType: QueryType = getQueryType(queryComponents);
-    const {reference, specificProperties, documentExpression} = parseQuery(queryComponents);
+    let queries = [FQLParser.parse(queryString)];
 
-    if (onChangeListener) {
-      setListener(queryType, reference, specificProperties, onChangeListener);
-    } else {
-      const result = await getResult(queryString, queryType, reference, specificProperties);
-      return new QueryResult(result, documentExpression);
-    }
+    checkNotEqualComponent(queries);
+
+    let result: Document[] = [];
+    let docExpr: boolean = false;
+    await Promise.all(queries.map(async (query) => {
+      const queryType: QueryType = getQueryType(query);
+      const {reference, specificProperties, documentExpression} = parseQuery(query);
+      docExpr = documentExpression;
+
+      if (onChangeListener) {
+        if (queries.length > 1) {
+          if (queries.indexOf(query) === 0) queryLock = false;
+          setListener(queryType, reference, specificProperties, () => {
+            this.query(queryString)
+                .then((result) => onChangeListener(result, null))
+                .catch((e) => onChangeListener(null, e));
+          });
+        } else {
+          setListener(queryType, reference, specificProperties, onChangeListener);
+        }
+      } else {
+        const queryRes = await getResult(queryString, queryType, reference, specificProperties);
+        result.push(...queryRes);
+      }
+    }));
+    return new QueryResult(result, docExpr);
   } catch (e) {
     onChangeListener && onChangeListener(null, e);
     return Promise.reject(e);
+  } finally {
+    queryLock = false;
   }
 };
 

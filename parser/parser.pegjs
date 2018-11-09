@@ -1,5 +1,5 @@
 Path
-  = "/"? path: PathComponent+ "/"? {
+  = _ "/"? path: PathComponent+ "/"? _{
     return path;
   }
 
@@ -65,7 +65,7 @@ Identifier
   = QuotedIdentifier / UnQuotedIdentifier
 
 WhereOperator
-  =  "has" / "==" / "<=" / ">=" / "<" / ">"
+  =  "has" / "!=" / "==" / "<=" / ">=" / "<" / ">"
 
 WhereClause
   = _ field:Identifier _ operator:WhereOperator _ value:WhereValue _ {
