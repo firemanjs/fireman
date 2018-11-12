@@ -13,7 +13,7 @@ To install run
 $ npm install fireman
 ```
 
-This package only contains Fireman API and CLI, for the Electron app refer to [fireman-electron](https://github.com/firemanjs/fireman-electron).
+This package only contains Fireman API and CLI, for the Electron app refer to [fireman-electron](https://github.com/firemanjs/fireman-electron). (Not yet released)
 
 ## Usage
 
@@ -54,7 +54,7 @@ If no query is provided, starts the Realtime interactive shell, otherwise perfor
 
 The following options can be appended to queries:
 
-**`-l --listen`** listens for changes in the queried data and updates the output in real time.
+**`-l`** listens for changes in the queried data and updates the output in real time.
 
 ## License
 
