@@ -68,6 +68,32 @@ function checkNotEqualComponent(queries) {
  */
 let queryLock = false;
 
+async function executeQueries(initialReference, queries, onChangeListener: onChangeListener, queryString: string) {
+  let result: Document[] = [];
+  let docExpr: boolean = false;
+  await Promise.all(queries.map(async (query) => {
+    const {reference, specificProperties, documentExpression, queryType, recursiveComponents} = parseQuery(initialReference, query);
+    docExpr = documentExpression;
+
+    if (onChangeListener) {
+      if (queries.length > 1) {
+        if (queries.indexOf(query) === 0) queryLock = false;
+        setListener(queryType, reference, specificProperties, () => {
+          this.query(queryString)
+              .then((result) => onChangeListener(result, null))
+              .catch((e) => onChangeListener(null, e));
+        });
+      } else {
+        setListener(queryType, reference, specificProperties, onChangeListener);
+      }
+    } else {
+      const queryRes = await getResult(queryType, reference, specificProperties, recursiveComponents);
+      result.push(...queryRes);
+    }
+  }));
+  return new QueryResult(result, docExpr);
+}
+
 /**
  * Runs a query against Firebase database
  * @param queryString The FiremanQL query
@@ -82,30 +108,7 @@ export const query = async (queryString: string, onChangeListener?: onChangeList
 
     checkNotEqualComponent(queries);
 
-    let result: Document[] = [];
-    let docExpr: boolean = false;
-    await Promise.all(queries.map(async (query) => {
-      const queryType: QueryType = getQueryType(query);
-      const {reference, specificProperties, documentExpression} = parseQuery(query);
-      docExpr = documentExpression;
-
-      if (onChangeListener) {
-        if (queries.length > 1) {
-          if (queries.indexOf(query) === 0) queryLock = false;
-          setListener(queryType, reference, specificProperties, () => {
-            this.query(queryString)
-                .then((result) => onChangeListener(result, null))
-                .catch((e) => onChangeListener(null, e));
-          });
-        } else {
-          setListener(queryType, reference, specificProperties, onChangeListener);
-        }
-      } else {
-        const queryRes = await getResult(queryString, queryType, reference, specificProperties);
-        result.push(...queryRes);
-      }
-    }));
-    return new QueryResult(result, docExpr);
+    return await executeQueries(false, queries, onChangeListener, queryString);
   } catch (e) {
     onChangeListener && onChangeListener(null, e);
     return Promise.reject(e);
@@ -152,16 +155,10 @@ export enum QueryType {
   COLLECTION,
 }
 
-const getQueryType = (components): QueryType =>
-    components.filter(c => c.type === ComponentType.LITERAL)
-        .length % 2 ?
-        QueryType.COLLECTION :
-        QueryType.DOCUMENT;
-
 let firebaseAppsInitialized = [];
 let firestore: FirebaseFirestore.Firestore;
 
-const parseQuery = (components) => {
+const parseQuery = (initialReference, components) => {
   let documentExpression = false;
 
   const currentProject = auth.getCurrentProject();
@@ -176,18 +173,28 @@ const parseQuery = (components) => {
     firestore.settings({timestampsInSnapshots: true});
   }
 
-  firestore = FirebaseAdmin.firestore(FirebaseAdmin.app(currentProject));
+  firestore = initialReference || FirebaseAdmin.firestore(FirebaseAdmin.app(currentProject));
 
   let reference: any = firestore;
   let collection = true;
+  let recursiveComponents = [];
+  let singleDoc = true;
   let specificProperties: string[] = [];
+  let br = false;
 
   for (const component of components) {
+    if (br) break;
     switch (component.type) {
       case ComponentType.LITERAL:
         const url = component.value;
+        if (!singleDoc) {
+          recursiveComponents = components.slice(components.indexOf(component));
+          br = true;
+          break;
+        }
         if (collection) {
           collection = false;
+
           reference = reference.collection(url);
         } else {
           collection = true;
@@ -195,10 +202,14 @@ const parseQuery = (components) => {
         }
         break;
       case ComponentType.ALL:
-        collection = true;
+        singleDoc = false;
+        collection = false;
         break;
       case ComponentType.COLLECTION_EXPRESSION:
         if (reference instanceof CollectionReference) {
+          singleDoc = false;
+          collection = false;
+
           for (const expressionComponent of component.components) {
             if (expressionComponent.type === 'where') {
               reference = (<CollectionReference>reference).where(
@@ -223,14 +234,18 @@ const parseQuery = (components) => {
         break;
     }
   }
+
+  const queryType = !collection ? QueryType.COLLECTION : QueryType.DOCUMENT;
   return {
     reference,
     specificProperties,
     documentExpression,
+    queryType,
+    recursiveComponents,
   };
 };
 
-const getResult = async (queryString: string, queryType, reference: any, specificProperties: string[]): Promise<Document[]> => {
+const getResult = async (queryType, reference: any, specificProperties: string[], recursiveComponents: any[]): Promise<Document[]> => {
   let documents: Document[] = [];
 
   if (queryType === QueryType.DOCUMENT) {
@@ -240,15 +255,20 @@ const getResult = async (queryString: string, queryType, reference: any, specifi
       document.setData(snapshot, specificProperties);
       documents.push(document);
     } else {
-      throw new Error('No such document');
+      return [];
     }
   } else {
-    const snapshot = await reference.get();
-    snapshot.forEach((docSnapshot: QueryDocumentSnapshot) => {
-      const document: Document = Document.fromDocumentReference(docSnapshot.ref);
-      document.setData(docSnapshot, specificProperties);
-      documents.push(document);
-    });
+    const snapshot: QuerySnapshot = await reference.get();
+    await Promise.all(snapshot.docs.map(async (docSnapshot: QueryDocumentSnapshot) => {
+      if (recursiveComponents.length > 0) {
+        documents.push(...(await executeQueries(docSnapshot.ref, [recursiveComponents], null, "")).data);
+      } else {
+        const document: Document = Document.fromDocumentReference(docSnapshot.ref);
+        document.setData(docSnapshot, specificProperties);
+        documents.push(document);
+      }
+    }));
   }
+
   return documents;
 };
