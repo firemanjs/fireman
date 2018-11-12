@@ -92,9 +92,7 @@ async function printResult(result: QueryResult) {
 async function getResult(listen: boolean, input) {
   if (listen) {
     await Firestore.query(input, async (result, error) => {
-      if (error) {
-        throw error.message;
-      }
+      console.error(chalk.red(error.message));
 
       return result;
     });

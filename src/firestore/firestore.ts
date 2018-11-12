@@ -75,7 +75,11 @@ async function executeQueries(initialReference, queries, onChangeListener: onCha
     const {reference, specificProperties, documentExpression, queryType, recursiveComponents} = parseQuery(initialReference, query);
     docExpr = documentExpression;
 
-    if (onChangeListener) {
+    if (onChangeListener && recursiveComponents.length > 0) {
+      throw new Error("-l option is not available for nested queries");
+    }
+
+    if (onChangeListener && recursiveComponents.length === 0) {
       if (queries.length > 1) {
         if (queries.indexOf(query) === 0) queryLock = false;
         setListener(queryType, reference, specificProperties, () => {
