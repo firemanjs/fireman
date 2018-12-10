@@ -1,5 +1,5 @@
 {
-  "name": "fireman",
+  "name": "@firemanjs/fireman",
   "version": "0.0.5",
   "description": "Fireman API and CLI",
   "main": "dist/index.js",
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Salvatore-Giordano/fireman-cli.git"
+    "url": "git+https://github.com/firemanjs/fireman.git"
   },
   "keywords": [
     "fireman",
@@ -23,12 +23,15 @@
     "database",
     "tools"
   ],
-  "author": "Salvatore Giordano",
+  "contributors": [
+    "Salvatore Giordano <salvatoregiordanoo@gmail.com>",
+    "Umberto Pepato <umbo.pepato@gmail.com>"
+  ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Salvatore-Giordano/fireman-cli/issues"
+    "url": "https://github.com/firemanjs/fireman/issues"
   },
-  "homepage": "https://github.com/Salvatore-Giordano/fireman-cli#readme",
+  "homepage": "https://github.com/firemanjs/fireman#readme",
   "dependencies": {
     "@types/inquirer": "^0.0.43",
     "chalk": "^2.4.1",
