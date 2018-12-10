@@ -2,9 +2,6 @@
 
 A cli and desktop client for Firebase databases that makes querying and managing easy.
 
-> 🛠This package is still in it's early stages of development thus is not yet published to npm.  
-> Until then feel free to try it by cloning this repository and following [build](https://github.com/firemanjs/fireman/wiki/Build) instructions. 
-
 ## Install
 
 To install run
