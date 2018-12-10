@@ -1,5 +1,5 @@
 import {Collection} from "./collection";
-import {DocumentReference, CollectionReference, DocumentSnapshot} from "@google-cloud/firestore";
+import {CollectionReference, DocumentReference, DocumentSnapshot} from "@google-cloud/firestore";
 
 export class Document {
   public queryRef: string;
@@ -20,18 +20,8 @@ export class Document {
     return document;
   }
 
-  setData(snapshot: DocumentSnapshot, specificProperties: string[]): void {
-    this.data = {};
-    let snapshotData: any = snapshot.data();
-    if (specificProperties && specificProperties.length > 0) {
-      specificProperties.forEach(p => {
-        if (snapshotData.hasOwnProperty(p)) {
-          this.data[p] = snapshotData[p];
-        }
-      });
-    } else {
-      this.data = snapshotData;
-    }
+  setData(snapshot: DocumentSnapshot): void {
+    this.data = snapshot.data();
   }
 
 }

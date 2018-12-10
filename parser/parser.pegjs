@@ -1,5 +1,5 @@
 Path
-  = "/"? path: PathComponent+ "/"? {
+  = _ "/"? path: PathComponent+ "/"? _{
     return path;
   }
 
@@ -40,7 +40,7 @@ _ "whitespace"
   = [ \t\n\r]*
 
 UnQuotedIdentifier
-  = $[^\/\{\}\[\]\<\>\= ,\^_.]+
+  = $[^\/\{\}\[\]\<\>\= ,\^_.!]+
 
 QuotedIdentifier
   = DoubleQuotedIdentifier / SingleQuotedIdentifier
@@ -65,7 +65,7 @@ Identifier
   = QuotedIdentifier / UnQuotedIdentifier
 
 WhereOperator
-  =  "has" / "==" / "<=" / ">=" / "<" / ">"
+  =  "has" / "!=" / "==" / "<=" / ">=" / "<" / ">"
 
 WhereClause
   = _ field:Identifier _ operator:WhereOperator _ value:WhereValue _ {
