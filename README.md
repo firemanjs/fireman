@@ -7,7 +7,7 @@ A cli and desktop client for Firebase databases that makes querying and managing
 To install run
 
 ```
-$ npm install -g fireman
+$ npm install -g @firemanjs/fireman
 ```
 
 This package only contains Fireman API and CLI, for the Electron app refer to [fireman-electron](https://github.com/firemanjs/fireman-electron). (Not yet released)
