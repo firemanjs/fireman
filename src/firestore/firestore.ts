@@ -99,14 +99,18 @@ export enum QueryType {
   COLLECTION,
 }
 
-const currentProject = auth.getCurrentProject();
-const serviceAccount = require(`../projects/${currentProject}`);
-FirebaseAdmin.initializeApp({
-  credential: FirebaseAdmin.credential.cert(serviceAccount),
-  databaseURL: serviceAccount.databaseURL,
-}, currentProject);
-const firestore = FirebaseAdmin.firestore(FirebaseAdmin.app(currentProject));
-firestore.settings({timestampsInSnapshots: true});
+let currentProject, serviceAccount, firestore;
+
+const init = () => {
+  currentProject = auth.getCurrentProject();
+  serviceAccount = require(`../projects/${currentProject}`);
+  FirebaseAdmin.initializeApp({
+    credential: FirebaseAdmin.credential.cert(serviceAccount),
+    databaseURL: serviceAccount.databaseURL,
+  }, currentProject);
+  firestore = FirebaseAdmin.firestore(FirebaseAdmin.app(currentProject));
+  firestore.settings({timestampsInSnapshots: true});
+};
 
 const isCollection = (references: any[]) => {
   return references[0] instanceof CollectionReference || references[0] instanceof Firestore || references[0] instanceof Query;
