@@ -101,8 +101,8 @@ export enum QueryType {
 
 let currentProject, serviceAccount, firestore;
 
-const init = () => {
-  currentProject = auth.getCurrentProject();
+currentProject = auth.getCurrentProject();
+if (currentProject) {
   serviceAccount = require(`../projects/${currentProject}`);
   FirebaseAdmin.initializeApp({
     credential: FirebaseAdmin.credential.cert(serviceAccount),
@@ -110,8 +110,8 @@ const init = () => {
   }, currentProject);
   firestore = FirebaseAdmin.firestore(FirebaseAdmin.app(currentProject));
   firestore.settings({timestampsInSnapshots: true});
-};
-
+}
+  
 const isCollection = (references: any[]) => {
   return references[0] instanceof CollectionReference || references[0] instanceof Firestore || references[0] instanceof Query;
 };
