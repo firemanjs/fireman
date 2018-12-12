@@ -1,6 +1,6 @@
 {
   "name": "@firemanjs/fireman",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Fireman API and CLI",
   "main": "dist/index.js",
   "bin": {
