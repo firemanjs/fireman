@@ -12,7 +12,7 @@ export class Document {
     document.id = reference.id;
     document.queryRef = reference.path;
     document.getCollections = async () => {
-      const collections: CollectionReference[] = await reference.getCollections();
+      const collections: CollectionReference[] = await reference.listCollections();
       return collections.map((collection: CollectionReference) => {
         return Collection.fromCollectionReference(collection);
       });

@@ -1,14 +1,13 @@
 #!/usr/bin/env node
-
 import * as ora from 'ora';
 import * as auth from './auth';
-import * as readLine from "readline";
-import * as Firestore from "./firestore/firestore";
-import * as commander from "commander";
+import * as readLine from 'readline';
+import * as Firestore from './firestore/firestore';
+import {unsubscribeListener} from './firestore/firestore';
+import * as commander from 'commander';
 import {table} from 'table';
-import chalk from "chalk";
+import chalk from 'chalk';
 import * as inquirer from 'inquirer';
-import {unsubscribeListener} from "./firestore/firestore";
 import {QueryResult} from './firestore/query-result';
 
 const rl = readLine.createInterface({
@@ -92,16 +91,13 @@ async function printResult(result: QueryResult) {
 async function getResult(listen: boolean, input) {
   if (listen) {
     await Firestore.query(input, async (result, error) => {
-      console.error(chalk.red(error.message));
-
+      if (error) {
+        console.error(chalk.red(error.message));
+      }
       return result;
     });
   } else {
-    const result = await Firestore.query(input);
-
-    if (result) {
-      return result;
-    }
+    return await Firestore.query(input);
   }
 }
 
